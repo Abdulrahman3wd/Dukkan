@@ -14,4 +14,9 @@
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Domain/RetailX.Organization.Domain.csproj" />
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Infrastructure/RetailX.Organization.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/backend/Modules/Settings/">
+    <Project Path="src/backend/Modules/Settings/RetailX.Settings.Api/RetailX.Settings.Api.csproj" />
+    <Project Path="src/backend/Modules/Settings/RetailX.Settings.Domain/RetailX.Settings.Domain.csproj" />
+    <Project Path="src/backend/Modules/Settings/RetailX.Settings.Infrastructure/RetailX.Settings.Infrastructure.csproj" />
+  </Folder>
 </Solution>

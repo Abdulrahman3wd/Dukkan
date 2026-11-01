@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RetailX.BuildingBlocks.Domain;
 using RetailX.BuildingBlocks.MultiTenancy;
 using RetailX.Organization.Infrastructure;
-
+using RetailX.Settings.Infrastructure;
 namespace RetailX.BuildingBlocks.Persistence;
 
 public class RetailXDbContext : DbContext
@@ -21,6 +21,7 @@ public class RetailXDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyOrganization();
+        modelBuilder.ApplySettings();
         // next modules will be registered here
 
         ApplyGlobalFilters(modelBuilder);
