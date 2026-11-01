@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RetailX.Settings.Domain;
 
 namespace RetailX.Settings.Api;
@@ -8,7 +9,7 @@ public record SettingDto(
     string Type, string MostSpecificScope, string EffectiveValue);
 
 public record SetSettingRequest(SettingScope Scope, Guid ScopeId, string Value);
-
+[Authorize]
 [ApiController]
 [Route("api/settings")]
 public class SettingsController : ControllerBase

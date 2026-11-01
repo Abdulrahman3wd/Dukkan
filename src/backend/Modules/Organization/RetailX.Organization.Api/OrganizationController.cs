@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RetailX.BuildingBlocks.MultiTenancy;
 using RetailX.BuildingBlocks.Persistence;
@@ -6,6 +7,7 @@ using RetailX.Organization.Domain;
 
 namespace RetailX.Organization.Api;
 
+[Authorize]
 [ApiController]
 [Route("api/organization")]
 public class OrganizationController : ControllerBase
@@ -20,7 +22,7 @@ public class OrganizationController : ControllerBase
     }
 
     // ---------- Tenants (temporary open endpoint, will be Super Admin only) ----------
-
+    [AllowAnonymous]
     [HttpPost("tenants")]
     public async Task<ActionResult<TenantResponse>> CreateTenant(CreateTenantRequest r, CancellationToken ct)
     {
@@ -29,7 +31,7 @@ public class OrganizationController : ControllerBase
         await _db.SaveChangesAsync(ct);
         return Ok(new TenantResponse(t.Id, t.Name, t.Code, t.IsActive));
     }
-
+    [AllowAnonymous]
     [HttpGet("tenants")]
     public async Task<IEnumerable<TenantResponse>> GetTenants(CancellationToken ct)
         => await _db.Set<Tenant>().AsNoTracking()

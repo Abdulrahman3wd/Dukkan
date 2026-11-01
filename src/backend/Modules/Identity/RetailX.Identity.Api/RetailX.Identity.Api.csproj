@@ -5,18 +5,19 @@
     <ProjectReference Include="..\RetailX.Identity.Infrastructure\RetailX.Identity.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\RetailX.BuildingBlocks\RetailX.BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\RetailX.BuildingBlocks.Persistence\RetailX.BuildingBlocks.Persistence.csproj" />
+    <ProjectReference Include="..\..\Organization\RetailX.Organization.Domain\RetailX.Organization.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
   </ItemGroup>
-	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-	</ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 </Project>
