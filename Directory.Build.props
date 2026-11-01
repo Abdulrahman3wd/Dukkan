@@ -1,8 +1,9 @@
 <Project>
-  <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<LangVersion>latest</LangVersion>
+		<NuGetAudit>false</NuGetAudit>
+	</PropertyGroup>
 </Project>
