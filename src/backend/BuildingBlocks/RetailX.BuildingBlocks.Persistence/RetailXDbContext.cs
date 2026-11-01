@@ -4,6 +4,7 @@ using RetailX.BuildingBlocks.Domain;
 using RetailX.BuildingBlocks.MultiTenancy;
 using RetailX.Organization.Infrastructure;
 using RetailX.Settings.Infrastructure;
+using RetailX.Identity.Infrastructure;
 namespace RetailX.BuildingBlocks.Persistence;
 
 public class RetailXDbContext : DbContext
@@ -22,6 +23,7 @@ public class RetailXDbContext : DbContext
     {
         modelBuilder.ApplyOrganization();
         modelBuilder.ApplySettings();
+        modelBuilder.ApplyIdentity();
         // next modules will be registered here
 
         ApplyGlobalFilters(modelBuilder);

@@ -9,6 +9,11 @@
     <Project Path="src/backend/Host/RetailX.Api/RetailX.Api.csproj" />
   </Folder>
   <Folder Name="/src/backend/Modules/" />
+  <Folder Name="/src/backend/Modules/Identity/">
+    <Project Path="src/backend/Modules/Identity/RetailX.Identity.Api/RetailX.Identity.Api.csproj" />
+    <Project Path="src/backend/Modules/Identity/RetailX.Identity.Domain/RetailX.Identity.Domain.csproj" />
+    <Project Path="src/backend/Modules/Identity/RetailX.Identity.Infrastructure/RetailX.Identity.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/backend/Modules/Organization/">
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Api/RetailX.Organization.Api.csproj" />
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Domain/RetailX.Organization.Domain.csproj" />

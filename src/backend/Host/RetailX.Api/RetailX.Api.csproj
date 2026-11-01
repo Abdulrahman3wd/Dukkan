@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\BuildingBlocks\RetailX.BuildingBlocks\RetailX.BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\Modules\Organization\RetailX.Organization.Api\RetailX.Organization.Api.csproj" />
     <ProjectReference Include="..\..\Modules\Settings\RetailX.Settings.Api\RetailX.Settings.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\RetailX.Identity.Api\RetailX.Identity.Api.csproj" />
   </ItemGroup>
 
 </Project>

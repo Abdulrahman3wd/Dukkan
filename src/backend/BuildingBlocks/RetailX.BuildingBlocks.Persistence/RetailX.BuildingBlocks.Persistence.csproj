@@ -4,6 +4,7 @@
     <ProjectReference Include="..\RetailX.BuildingBlocks\RetailX.BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\Modules\Organization\RetailX.Organization.Infrastructure\RetailX.Organization.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Settings\RetailX.Settings.Infrastructure\RetailX.Settings.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\RetailX.Identity.Infrastructure\RetailX.Identity.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
