@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/src/backend/Modules/" />
   <Folder Name="/src/backend/Modules/Organization/">
+    <Project Path="src/backend/Modules/Organization/RetailX.Organization.Api/RetailX.Organization.Api.csproj" />
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Domain/RetailX.Organization.Domain.csproj" />
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Infrastructure/RetailX.Organization.Infrastructure.csproj" />
   </Folder>
