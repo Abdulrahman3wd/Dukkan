@@ -5,6 +5,8 @@
     <ProjectReference Include="..\RetailX.Settings.Infrastructure\RetailX.Settings.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\RetailX.BuildingBlocks\RetailX.BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\RetailX.BuildingBlocks.Persistence\RetailX.BuildingBlocks.Persistence.csproj" />
+    <ProjectReference Include="..\..\Identity\RetailX.Identity.Api\RetailX.Identity.Api.csproj" />
+    <ProjectReference Include="..\..\Identity\RetailX.Identity.Infrastructure\RetailX.Identity.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -48,5 +48,23 @@ public static class IdentityModelConfiguration
             e.Property(x => x.PasswordHash).HasMaxLength(500).IsRequired();
             e.HasIndex(x => x.UserName).IsUnique();
         });
+        b.Entity<Role>(e =>
+        {
+            e.ToTable("Roles", "identity");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(500);
+            e.HasIndex(x => new { x.TenantId, x.Name }).IsUnique().HasFilter("[IsDeleted] = 0");
+        });
+
+        b.Entity<RolePermission>(e =>
+        {
+            e.ToTable("RolePermissions", "identity");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Permission).HasMaxLength(200).IsRequired();
+            e.HasOne(x => x.Role).WithMany(r => r.Permissions)
+                .HasForeignKey(x => x.RoleId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.RoleId, x.Permission }).IsUnique().HasFilter("[IsDeleted] = 0");
+        });
     }
 }
