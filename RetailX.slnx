@@ -14,6 +14,11 @@
     <Project Path="src/backend/Modules/Identity/RetailX.Identity.Domain/RetailX.Identity.Domain.csproj" />
     <Project Path="src/backend/Modules/Identity/RetailX.Identity.Infrastructure/RetailX.Identity.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/backend/Modules/Licensing/">
+    <Project Path="src/backend/Modules/Licensing/RetailX.Licensing.Api/RetailX.Licensing.Api.csproj" />
+    <Project Path="src/backend/Modules/Licensing/RetailX.Licensing.Domain/RetailX.Licensing.Domain.csproj" />
+    <Project Path="src/backend/Modules/Licensing/RetailX.Licensing.Infrastructure/RetailX.Licensing.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/backend/Modules/Organization/">
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Api/RetailX.Organization.Api.csproj" />
     <Project Path="src/backend/Modules/Organization/RetailX.Organization.Domain/RetailX.Organization.Domain.csproj" />

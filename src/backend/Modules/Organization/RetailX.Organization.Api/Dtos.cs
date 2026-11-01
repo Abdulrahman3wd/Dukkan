@@ -2,7 +2,8 @@
 
 namespace RetailX.Organization.Api;
 
-public record CreateTenantRequest(string Name, string? Code, string AdminUserName, string AdminPassword); public record TenantResponse(Guid Id, string Name, string? Code, bool IsActive);
+public record CreateTenantRequest(string Name, string? Code, string AdminUserName, string AdminPassword); 
+public record TenantResponse(Guid Id, string Name, string? Code, bool IsActive);
 
 public record CreateCompanyRequest(string Name, string? Code, string? TaxNumber, string? DefaultCurrency);
 public record CompanyResponse(Guid Id, Guid TenantId, string Name, string? Code, string? TaxNumber, string DefaultCurrency, bool IsActive);

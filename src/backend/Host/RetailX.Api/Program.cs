@@ -65,6 +65,7 @@ builder.Services.AddAuthorization(o =>
 
 
 var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<RetailXDbContext>();
@@ -84,6 +85,7 @@ using (var scope = app.Services.CreateScope())
         await db.SaveChangesAsync();
     }
 }
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

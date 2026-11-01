@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\RetailX.Licensing.Domain\RetailX.Licensing.Domain.csproj" />
+    <ProjectReference Include="..\RetailX.Licensing.Infrastructure\RetailX.Licensing.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Identity\RetailX.Identity.Api\RetailX.Identity.Api.csproj" />
+    <ProjectReference Include="..\..\Identity\RetailX.Identity.Infrastructure\RetailX.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\RetailX.BuildingBlocks\RetailX.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\RetailX.BuildingBlocks.Persistence\RetailX.BuildingBlocks.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
+  </ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

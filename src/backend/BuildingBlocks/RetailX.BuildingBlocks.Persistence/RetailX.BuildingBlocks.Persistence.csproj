@@ -5,6 +5,7 @@
     <ProjectReference Include="..\..\Modules\Organization\RetailX.Organization.Infrastructure\RetailX.Organization.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Settings\RetailX.Settings.Infrastructure\RetailX.Settings.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\RetailX.Identity.Infrastructure\RetailX.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Licensing\RetailX.Licensing.Infrastructure\RetailX.Licensing.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
