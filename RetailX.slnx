@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/backend/" />
+  <Folder Name="/src/backend/BuildingBlocks/">
+    <Project Path="src/backend/BuildingBlocks/RetailX.BuildingBlocks/RetailX.BuildingBlocks.csproj" />
+  </Folder>
+  <Folder Name="/src/backend/Host/">
+    <Project Path="src/backend/Host/RetailX.Api/RetailX.Api.csproj" />
+  </Folder>
+</Solution>
