@@ -14,8 +14,12 @@ public record BranchOption(Guid CompanyId, Guid BranchId);
 
 public record AuthResponse(
     string AccessToken,
+    string RefreshToken,
     bool BranchSelected,
     IReadOnlyList<BranchOption> Branches);
+
+public record RefreshRequest(Guid TenantId, string RefreshToken);
+public record PlatformLoginRequest(string UserName, string Password);
 
 [ApiController]
 [Route("api/auth")]
@@ -68,7 +72,21 @@ public class AuthController : ControllerBase
         var token = _tokens.CreateAccessToken(new AccessTokenRequest(
             user.Id, user.TenantId, user.UserName, user.IsTenantAdmin, companyId, branchId));
 
-        return new AuthResponse(token, branchId is not null, branches);
+        var refresh = await IssueRefreshTokenAsync(user.TenantId, user.Id, companyId, branchId, ct);
+        return new AuthResponse(token, refresh, branchId is not null, branches);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("platform-login")]
+    public async Task<IActionResult> PlatformLogin(PlatformLoginRequest r, CancellationToken ct)
+    {
+        var admin = await _db.Set<PlatformAdmin>()
+            .FirstOrDefaultAsync(a => a.UserName == r.UserName && !a.IsDeleted, ct);
+
+        if (admin is null || !admin.IsActive || !_passwords.Verify(admin.PasswordHash, r.Password))
+            return Unauthorized("Invalid username or password.");
+
+        return Ok(new { accessToken = _tokens.CreatePlatformAdminToken(admin.Id, admin.UserName) });
     }
     public record BootstrapRequest(Guid TenantId, string UserName, string FullName, string Password);
 
@@ -132,7 +150,74 @@ public class AuthController : ControllerBase
         var token = _tokens.CreateAccessToken(new AccessTokenRequest(
             user.Id, tenantId, user.UserName, user.IsTenantAdmin, companyId, r.BranchId));
 
+        var refresh = await IssueRefreshTokenAsync(tenantId, user.Id, companyId, r.BranchId, ct);
         var branches = assignments.Select(a => new BranchOption(a.CompanyId, a.BranchId)).ToList();
-        return new AuthResponse(token, true, branches);
+        return new AuthResponse(token, refresh, true, branches);
+    }
+    [AllowAnonymous]
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest r, CancellationToken ct)
+    {
+        var hash = _tokens.HashRefreshToken(r.RefreshToken);
+
+        var stored = await _db.Set<RefreshToken>().IgnoreQueryFilters()
+            .FirstOrDefaultAsync(t => t.TokenHash == hash && t.TenantId == r.TenantId, ct);
+
+        if (stored is null) return Unauthorized();
+
+        // reuse of a revoked token => assume theft, revoke every token of this user
+        if (stored.RevokedAtUtc is not null)
+        {
+            var all = await _db.Set<RefreshToken>().IgnoreQueryFilters()
+                .Where(t => t.UserId == stored.UserId && t.RevokedAtUtc == null)
+                .ToListAsync(ct);
+            foreach (var t in all) t.RevokedAtUtc = DateTime.UtcNow;
+            await _db.SaveChangesAsync(ct);
+            return Unauthorized();
+        }
+
+        if (stored.ExpiresAtUtc <= DateTime.UtcNow) return Unauthorized();
+
+        var user = await _db.Set<User>().IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Id == stored.UserId && !u.IsDeleted, ct);
+        if (user is null || !user.IsActive) return Unauthorized();
+
+        var newRaw = _tokens.GenerateRefreshToken();
+        var newHash = _tokens.HashRefreshToken(newRaw);
+
+        stored.RevokedAtUtc = DateTime.UtcNow;
+        stored.ReplacedByTokenHash = newHash;
+
+        _db.Set<RefreshToken>().Add(new RefreshToken
+        {
+            TenantId = stored.TenantId,
+            UserId = stored.UserId,
+            TokenHash = newHash,
+            CompanyId = stored.CompanyId,
+            BranchId = stored.BranchId,
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(14)
+        });
+        await _db.SaveChangesAsync(ct);
+
+        var access = _tokens.CreateAccessToken(new AccessTokenRequest(
+            user.Id, user.TenantId, user.UserName, user.IsTenantAdmin, stored.CompanyId, stored.BranchId));
+
+        return new AuthResponse(access, newRaw, stored.BranchId is not null, Array.Empty<BranchOption>());
+    }
+    private async Task<string> IssueRefreshTokenAsync(
+    Guid tenantId, Guid userId, Guid? companyId, Guid? branchId, CancellationToken ct)
+    {
+        var raw = _tokens.GenerateRefreshToken();
+        _db.Set<RefreshToken>().Add(new RefreshToken
+        {
+            TenantId = tenantId,
+            UserId = userId,
+            TokenHash = _tokens.HashRefreshToken(raw),
+            CompanyId = companyId,
+            BranchId = branchId,
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(14)
+        });
+        await _db.SaveChangesAsync(ct);
+        return raw;
     }
 }

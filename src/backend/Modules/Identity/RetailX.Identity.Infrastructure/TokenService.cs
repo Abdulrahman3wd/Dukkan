@@ -36,4 +36,32 @@ public sealed class TokenService : ITokenService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public string CreatePlatformAdminToken(Guid adminId, string userName)
+    {
+        var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, adminId.ToString()),
+        new Claim(JwtRegisteredClaimNames.UniqueName, userName),
+        new Claim("platform_admin", "true")
+    };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.SigningKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _opt.Issuer,
+            audience: _opt.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_opt.AccessTokenMinutes),
+            signingCredentials: creds);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateRefreshToken()
+        => Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(64));
+
+    public string HashRefreshToken(string rawToken)
+        => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
 }

@@ -28,5 +28,25 @@ public static class IdentityModelConfiguration
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
             e.HasIndex(x => new { x.UserId, x.BranchId, x.IsActive });
         });
+
+        b.Entity<RefreshToken>(e =>
+        {
+            e.ToTable("RefreshTokens", "identity");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.TokenHash).HasMaxLength(128).IsRequired();
+            e.Property(x => x.ReplacedByTokenHash).HasMaxLength(128);
+            e.Ignore(x => x.IsActive);
+            e.HasIndex(x => x.TokenHash).IsUnique();
+            e.HasIndex(x => x.UserId);
+        });
+
+        b.Entity<PlatformAdmin>(e =>
+        {
+            e.ToTable("PlatformAdmins", "identity");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.UserName).HasMaxLength(100).IsRequired();
+            e.Property(x => x.PasswordHash).HasMaxLength(500).IsRequired();
+            e.HasIndex(x => x.UserName).IsUnique();
+        });
     }
 }

@@ -17,12 +17,14 @@ builder.Services.AddControllers()
     .AddApplicationPart(typeof(RetailX.Organization.Api.OrganizationController).Assembly)
     .AddApplicationPart(typeof(RetailX.Settings.Api.SettingsController).Assembly)
     .AddApplicationPart(typeof(RetailX.Identity.Api.AuthController).Assembly);
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddHttpContextAccessor();
 
 
 builder.Services.AddScoped<ICurrentContext, CurrentContext>();
+
 builder.Services.AddScoped<AuditingInterceptor>();
 
 builder.Services.AddDbContext<RetailXDbContext>((sp, options) =>
@@ -56,9 +58,32 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
-var app = builder.Build();
+builder.Services.AddAuthorization(o =>
+{
+    o.AddPolicy("PlatformAdmin", p => p.RequireClaim("platform_admin", "true"));
+});
 
+
+var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<RetailXDbContext>();
+    var passwords = scope.ServiceProvider.GetRequiredService<RetailX.Identity.Domain.IPasswordService>();
+
+    var adminUser = builder.Configuration["PlatformAdmin:UserName"];
+    var adminPass = builder.Configuration["PlatformAdmin:Password"];
+
+    if (!string.IsNullOrWhiteSpace(adminUser) && !string.IsNullOrWhiteSpace(adminPass)
+        && !await db.Set<RetailX.Identity.Domain.PlatformAdmin>().AnyAsync(a => a.UserName == adminUser))
+    {
+        db.Set<RetailX.Identity.Domain.PlatformAdmin>().Add(new RetailX.Identity.Domain.PlatformAdmin
+        {
+            UserName = adminUser,
+            PasswordHash = passwords.Hash(adminPass)
+        });
+        await db.SaveChangesAsync();
+    }
+}
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
