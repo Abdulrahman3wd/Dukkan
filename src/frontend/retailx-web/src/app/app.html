@@ -1,0 +1,41 @@
+<main class="mx-auto max-w-3xl space-y-6 p-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold">{{ rtl() ? 'تجارة بلا حدود' : 'Retail without limits' }}</h1>
+    <div class="flex gap-2">
+      <button (click)="toggleTheme()"
+        class="rounded-md border border-line bg-surface px-3 py-1.5 hover:bg-surface-sub">
+        {{ dark() ? 'Light' : 'Dark' }}
+      </button>
+      <button (click)="toggleDir()"
+        class="rounded-md border border-line bg-surface px-3 py-1.5 hover:bg-surface-sub">
+        {{ rtl() ? 'English' : 'العربية' }}
+      </button>
+    </div>
+  </div>
+
+  <section class="rounded-lg border border-line bg-surface p-5 shadow-raised">
+    <p class="text-muted">{{ rtl() ? 'مخزون ٢٨ منتجاً منخفض. راجع المخزون.' : '28 products are running low. Review stock.' }}</p>
+
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      <button class="rounded-md bg-primary px-4 py-2 font-medium text-on-primary hover:bg-primary-hover">
+        {{ rtl() ? 'حفظ التغييرات' : 'Save changes' }}
+      </button>
+      <button class="rounded-md bg-danger-soft px-4 py-2 font-medium text-danger">
+        {{ rtl() ? 'حذف المنتج' : 'Delete item' }}
+      </button>
+      <span class="rounded-full bg-success-soft px-3 py-1 text-xs font-medium text-success">
+        {{ rtl() ? 'مكتمل' : 'Completed' }}
+      </span>
+      <span class="rounded-full bg-warning-soft px-3 py-1 text-xs font-medium text-warning">
+        {{ rtl() ? 'مخزون منخفض' : 'Low stock' }}
+      </span>
+    </div>
+
+    <label class="mt-5 block text-sm font-medium" for="n">{{ rtl() ? 'اسم المنتج' : 'Product name' }}</label>
+    <input id="n" class="mt-1 w-full rounded-md border border-line bg-surface px-3 py-2"
+      [value]="rtl() ? 'قميص قطني' : 'Cotton shirt'">
+
+    <p class="mt-5">{{ rtl() ? 'الإجمالي' : 'Total' }}:
+      <span class="ltr font-semibold">SAR 128,450</span></p>
+  </section>
+</main>
