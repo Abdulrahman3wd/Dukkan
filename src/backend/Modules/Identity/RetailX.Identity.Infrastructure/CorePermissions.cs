@@ -10,7 +10,8 @@ public static class CorePermissions
     public const string SettingsView = "Settings.View";
     public const string SettingsManage = "Settings.Manage";
     public const string OrgManage = "Organization.Manage";
-
+    public const string SeatsView = "Licensing.Seat.View";
+    public const string SeatsManage = "Licensing.Seat.Manage";
     public static PermissionDefinition[] Definitions =>
     [
         new(UsersView, "Identity", "View users", "عرض المستخدمين"),
@@ -19,5 +20,7 @@ public static class CorePermissions
         new(SettingsView, "Settings", "View settings", "عرض الإعدادات"),
         new(SettingsManage, "Settings", "Manage settings", "تعديل الإعدادات"),
         new(OrgManage, "Organization", "Manage companies/branches", "إدارة الشركات والفروع"),
+        new(SeatsView, "Licensing", "View seat usage", "عرض استخدام الـ Seats"),
+        new(SeatsManage, "Licensing", "Force logout POS sessions", "طرد جلسات POS"),
     ];
 }

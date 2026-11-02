@@ -13,7 +13,7 @@ public static class LicensingServiceCollectionExtensions
 
         services.AddSingleton<ILicenseVerifier>(new RsaLicenseVerifier(publicKey));
         services.AddScoped<ILicenseService, LicenseService>();
-
+        services.AddScoped<ISeatService, SeatService>();
         // vendor side: only registered when a private key exists (our own server, never at customers)
         var privateKey = config["Licensing:PrivateKeyPem"];
         if (!string.IsNullOrWhiteSpace(privateKey))

@@ -13,33 +13,39 @@ public sealed record LicenseStatus(
     LicenseState State,
     LicensePayload? License,
     int UsedBranches,
-    int UsedPos,
     string? Message);
 
 public interface ILicenseSigner
 {
-    /// <summary>Vendor side only: signs a payload with the private key.</summary>
     SignedLicense Sign(LicensePayload payload);
 }
 
 public interface ILicenseVerifier
 {
-    /// <summary>Returns the payload if the signature is valid, otherwise null.</summary>
     LicensePayload? Verify(SignedLicense license);
 }
 
 public interface ILicenseService
 {
+    /// <summary>Status for the caller's tenant (from the JWT).</summary>
     Task<LicenseStatus> GetStatusAsync(CancellationToken ct = default);
+
+    /// <summary>Status for an explicit tenant (used at POS login, before a token exists).</summary>
+    Task<LicenseStatus> GetStatusAsync(Guid tenantId, CancellationToken ct = default);
+
     Task<LicenseStatus> InstallAsync(SignedLicense license, CancellationToken ct = default);
 
-    /// <summary>Throws LicenseException if another branch can't be created.</summary>
     Task EnsureCanAddBranchAsync(CancellationToken ct = default);
-    Task EnsureCanAddTerminalAsync(CancellationToken ct = default);
     Task EnsureWritableAsync(CancellationToken ct = default);
 }
 
-public sealed class LicenseException : Exception
+public class LicenseException : Exception
 {
     public LicenseException(string message) : base(message) { }
+}
+
+/// <summary>All seats of the branch are taken.</summary>
+public sealed class SeatUnavailableException : LicenseException
+{
+    public SeatUnavailableException(string message) : base(message) { }
 }

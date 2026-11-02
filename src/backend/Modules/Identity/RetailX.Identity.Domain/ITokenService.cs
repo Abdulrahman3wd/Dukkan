@@ -6,8 +6,10 @@ public record AccessTokenRequest(
     string UserName,
     bool IsTenantAdmin,
     Guid? CompanyId,
-    Guid? BranchId);
-
+    Guid? BranchId,
+    Guid? TerminalId = null,
+    Guid? SeatSessionId = null,
+    int? LifetimeMinutes = null);
 public interface ITokenService
 {
     string CreateAccessToken(AccessTokenRequest request);

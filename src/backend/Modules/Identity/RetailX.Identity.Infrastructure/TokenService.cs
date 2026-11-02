@@ -23,7 +23,8 @@ public sealed class TokenService : ITokenService
 };
         if (c.CompanyId is { } co) claims.Add(new Claim("company_id", co.ToString()));
         if (c.BranchId is { } br) claims.Add(new Claim("branch_id", br.ToString()));
-
+        if (c.TerminalId is { } tm) claims.Add(new Claim("terminal_id", tm.ToString()));
+        if (c.SeatSessionId is { } ss) claims.Add(new Claim("seat_session_id", ss.ToString()));
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.SigningKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -31,8 +32,7 @@ public sealed class TokenService : ITokenService
             issuer: _opt.Issuer,
             audience: _opt.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_opt.AccessTokenMinutes),
-            signingCredentials: creds);
+expires: DateTime.UtcNow.AddMinutes(c.LifetimeMinutes ?? _opt.AccessTokenMinutes), signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

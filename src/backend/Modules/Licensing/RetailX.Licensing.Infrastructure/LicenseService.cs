@@ -16,38 +16,43 @@ public sealed class LicenseService : ILicenseService
         _db = db; _verifier = verifier; _ctx = ctx;
     }
 
-    public async Task<LicenseStatus> GetStatusAsync(CancellationToken ct = default)
+    private Guid RequireTenant()
+        => _ctx.TenantId ?? throw new InvalidOperationException("Tenant context is required.");
+
+    public Task<LicenseStatus> GetStatusAsync(CancellationToken ct = default)
+        => GetStatusAsync(RequireTenant(), ct);
+
+    public async Task<LicenseStatus> GetStatusAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var tenantId = _ctx.TenantId ?? throw new InvalidOperationException("Tenant context is required.");
+        // explicit tenant filter so this also works before a JWT exists (POS login)
+        var branches = await _db.Set<Branch>().IgnoreQueryFilters()
+            .CountAsync(b => b.TenantId == tenantId && b.IsActive && !b.IsDeleted, ct);
 
-        var branches = await _db.Set<Branch>().CountAsync(b => b.IsActive, ct);
-        var pos = await _db.Set<Terminal>().CountAsync(t => t.IsActive, ct);
-
-        var current = await _db.Set<InstalledLicense>().AsNoTracking()
-            .FirstOrDefaultAsync(l => l.IsCurrent, ct);
+        var current = await _db.Set<InstalledLicense>().IgnoreQueryFilters().AsNoTracking()
+            .FirstOrDefaultAsync(l => l.TenantId == tenantId && l.IsCurrent && !l.IsDeleted, ct);
 
         if (current is null)
-            return new LicenseStatus(LicenseState.Missing, null, branches, pos, "No license installed.");
+            return new LicenseStatus(LicenseState.Missing, null, branches, "No license installed.");
 
         var payload = _verifier.Verify(new SignedLicense(current.Payload, current.Signature));
         if (payload is null || payload.TenantId != tenantId)
-            return new LicenseStatus(LicenseState.Invalid, null, branches, pos, "License signature is invalid.");
+            return new LicenseStatus(LicenseState.Invalid, null, branches, "License signature is invalid.");
 
         var now = DateTime.UtcNow;
         if (now <= payload.ExpiresAtUtc)
-            return new LicenseStatus(LicenseState.Valid, payload, branches, pos, null);
+            return new LicenseStatus(LicenseState.Valid, payload, branches, null);
 
         if (now <= payload.ExpiresAtUtc.AddDays(payload.GraceDays))
-            return new LicenseStatus(LicenseState.InGracePeriod, payload, branches, pos,
+            return new LicenseStatus(LicenseState.InGracePeriod, payload, branches,
                 "License expired. Renew before the grace period ends.");
 
-        return new LicenseStatus(LicenseState.Expired, payload, branches, pos,
+        return new LicenseStatus(LicenseState.Expired, payload, branches,
             "License expired. The system is read-only.");
     }
 
     public async Task<LicenseStatus> InstallAsync(SignedLicense license, CancellationToken ct = default)
     {
-        var tenantId = _ctx.TenantId ?? throw new InvalidOperationException("Tenant context is required.");
+        var tenantId = RequireTenant();
 
         var payload = _verifier.Verify(license)
             ?? throw new LicenseException("License signature is invalid.");
@@ -66,7 +71,7 @@ public sealed class LicenseService : ILicenseService
         });
         await _db.SaveChangesAsync(ct);
 
-        return await GetStatusAsync(ct);
+        return await GetStatusAsync(tenantId, ct);
     }
 
     public async Task EnsureCanAddBranchAsync(CancellationToken ct = default)
@@ -74,23 +79,12 @@ public sealed class LicenseService : ILicenseService
         var s = await GetStatusAsync(ct);
         EnsureUsable(s);
         if (s.UsedBranches >= s.License!.Branches)
-            throw new LicenseException($"Branch limit reached ({s.License.Branches}). Purchase an additional branch license.");
-    }
-
-    public async Task EnsureCanAddTerminalAsync(CancellationToken ct = default)
-    {
-        var s = await GetStatusAsync(ct);
-        EnsureUsable(s);
-        if (s.UsedPos >= s.License!.MaxPos)
-            throw new LicenseException($"POS limit reached ({s.License.MaxPos}). Purchase an additional POS license.");
+            throw new LicenseException(
+                $"Branch limit reached ({s.License.Branches}). Purchase an additional branch license.");
     }
 
     public async Task EnsureWritableAsync(CancellationToken ct = default)
-    {
-        var s = await GetStatusAsync(ct);
-        if (s.State is LicenseState.Valid or LicenseState.InGracePeriod) return;
-        throw new LicenseException(s.Message ?? "License is not valid.");
-    }
+        => EnsureUsable(await GetStatusAsync(ct));
 
     private static void EnsureUsable(LicenseStatus s)
     {
