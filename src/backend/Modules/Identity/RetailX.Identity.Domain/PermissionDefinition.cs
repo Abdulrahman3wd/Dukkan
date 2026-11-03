@@ -1,7 +1,6 @@
 ﻿namespace RetailX.Identity.Domain;
 
-public sealed record PermissionDefinition(
-    string Key, string Group, string DisplayNameEn, string DisplayNameAr);
+public sealed record PermissionDefinition(string Key, string Group);
 
 public interface IPermissionRegistry
 {

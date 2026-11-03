@@ -18,6 +18,4 @@ public sealed record SettingDefinition(
     SettingValueType Type,
     string DefaultValue,
     SettingScope MostSpecificScope,
-    string Group,
-    string DisplayNameEn,
-    string DisplayNameAr);
+    string Group);

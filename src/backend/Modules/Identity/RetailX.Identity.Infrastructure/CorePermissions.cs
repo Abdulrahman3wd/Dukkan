@@ -14,13 +14,13 @@ public static class CorePermissions
     public const string SeatsManage = "Licensing.Seat.Manage";
     public static PermissionDefinition[] Definitions =>
     [
-        new(UsersView, "Identity", "View users", "عرض المستخدمين"),
-        new(UsersManage, "Identity", "Manage users", "إدارة المستخدمين"),
-        new(RolesManage, "Identity", "Manage roles", "إدارة الأدوار"),
-        new(SettingsView, "Settings", "View settings", "عرض الإعدادات"),
-        new(SettingsManage, "Settings", "Manage settings", "تعديل الإعدادات"),
-        new(OrgManage, "Organization", "Manage companies/branches", "إدارة الشركات والفروع"),
-        new(SeatsView, "Licensing", "View seat usage", "عرض استخدام الـ Seats"),
-        new(SeatsManage, "Licensing", "Force logout POS sessions", "طرد جلسات POS"),
-    ];
+        new(UsersView, "Identity"),
+        new(UsersManage, "Identity"),
+        new(RolesManage, "Identity"),
+        new(SettingsView, "Settings"),
+        new(SettingsManage, "Settings"),
+        new(OrgManage, "Organization"),
+        new(SeatsView, "Licensing"),
+        new(SeatsManage, "Licensing"),
+];
 }

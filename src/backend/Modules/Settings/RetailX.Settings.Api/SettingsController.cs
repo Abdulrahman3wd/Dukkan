@@ -5,8 +5,7 @@ using RetailX.Settings.Domain;
 namespace RetailX.Settings.Api;
 
 public record SettingDto(
-    string Key, string Group, string DisplayNameEn, string DisplayNameAr,
-    string Type, string MostSpecificScope, string EffectiveValue);
+    string Key, string Group, string Type, string MostSpecificScope, string EffectiveValue);
 
 public record SetSettingRequest(SettingScope Scope, Guid ScopeId, string Value);
 [Authorize]
@@ -32,8 +31,7 @@ public class SettingsController : ControllerBase
         foreach (var d in _registry.All.OrderBy(x => x.Group).ThenBy(x => x.Key))
         {
             var value = await _settings.GetAsync(d.Key, companyId, branchId, ct);
-            list.Add(new SettingDto(d.Key, d.Group, d.DisplayNameEn, d.DisplayNameAr,
-                d.Type.ToString(), d.MostSpecificScope.ToString(), value));
+            list.Add(new SettingDto(d.Key, d.Group, d.Type.ToString(), d.MostSpecificScope.ToString(), value));
         }
         return list;
     }

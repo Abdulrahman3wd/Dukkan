@@ -1,0 +1,15 @@
+{
+  "demo": {
+    "title": "Retail without limits",
+    "lowStock": "28 products are running low. Review stock.",
+    "save": "Save changes",
+    "delete": "Delete item",
+    "completed": "Completed",
+    "low": "Low stock",
+    "productName": "Product name",
+    "productValue": "Cotton shirt",
+    "total": "Total",
+    "dark": "Dark",
+    "light": "Light"
+  }
+}

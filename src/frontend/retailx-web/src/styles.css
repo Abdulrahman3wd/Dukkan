@@ -96,7 +96,7 @@ body {
 }
 
 /* Arabic gets its own face first */
-[dir="rtl"] body { font-family: "Noto Sans Arabic Variable", "Inter Variable", system-ui, sans-serif; }
+html[lang="ar"] body { font-family: "Noto Sans Arabic Variable", "Inter Variable", system-ui, sans-serif; }
 
 /* Focus ring: 2px + 2px offset, always visible for keyboard users */
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

@@ -1,21 +1,22 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { LanguageService } from './core/i18n/language.service';
 
 @Component({
   selector: 'app-root',
+  imports: [TranslocoPipe],
   templateUrl: './app.html'
 })
 export class App {
+  lang = inject(LanguageService);
   dark = signal(false);
-  rtl = signal(false);
 
   toggleTheme() {
     this.dark.update(v => !v);
     document.documentElement.setAttribute('data-theme', this.dark() ? 'dark' : 'light');
   }
 
-  toggleDir() {
-    this.rtl.update(v => !v);
-    document.documentElement.setAttribute('dir', this.rtl() ? 'rtl' : 'ltr');
-    document.documentElement.setAttribute('lang', this.rtl() ? 'ar' : 'en');
+  onLang(e: Event) {
+    this.lang.use((e.target as HTMLSelectElement).value);
   }
 }
