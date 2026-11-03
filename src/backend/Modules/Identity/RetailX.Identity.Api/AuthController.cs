@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RetailX.BuildingBlocks.MultiTenancy;
 using RetailX.BuildingBlocks.Persistence;
 using RetailX.Identity.Domain;
+using RetailX.Organization.Domain;
 
 namespace RetailX.Identity.Api;
 
-public record LoginRequest(Guid TenantId, string UserName, string Password);
+public record LoginRequest(Guid? TenantId, string UserName, string Password);
 public record SelectBranchRequest(Guid BranchId);
 public record BranchOption(Guid CompanyId, Guid BranchId);
 
@@ -18,35 +18,40 @@ public record AuthResponse(
     bool BranchSelected,
     IReadOnlyList<BranchOption> Branches);
 
-public record RefreshRequest(Guid TenantId, string RefreshToken);
+public record RefreshRequest(string RefreshToken);
 public record PlatformLoginRequest(string UserName, string Password);
 
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
+    private const int RefreshTokenDays = 14;
+
     private readonly RetailXDbContext _db;
     private readonly IPasswordService _passwords;
     private readonly ITokenService _tokens;
     private readonly ICurrentContext _ctx;
+    private readonly TenantResolver _resolver;
 
     public AuthController(RetailXDbContext db, IPasswordService passwords,
-        ITokenService tokens, ICurrentContext ctx)
+        ITokenService tokens, ICurrentContext ctx, TenantResolver resolver)
     {
         _db = db;
         _passwords = passwords;
         _tokens = tokens;
         _ctx = ctx;
+        _resolver = resolver;
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest r, CancellationToken ct)
     {
-        // Login happens before we have a tenant in the token, so bypass the tenant filter
-        // and scope the query to the tenant given in the request.
+        var tenantId = await _resolver.ResolveAsync(r.TenantId, ct);
+        if (tenantId is null) return BadRequest("Tenant could not be determined.");
+
         var user = await _db.Set<User>().IgnoreQueryFilters()
-            .FirstOrDefaultAsync(u => u.TenantId == r.TenantId
+            .FirstOrDefaultAsync(u => u.TenantId == tenantId
                                       && u.UserName == r.UserName
                                       && !u.IsDeleted, ct);
 
@@ -76,43 +81,6 @@ public class AuthController : ControllerBase
         return new AuthResponse(token, refresh, branchId is not null, branches);
     }
 
-    [AllowAnonymous]
-    [HttpPost("platform-login")]
-    public async Task<IActionResult> PlatformLogin(PlatformLoginRequest r, CancellationToken ct)
-    {
-        var admin = await _db.Set<PlatformAdmin>()
-            .FirstOrDefaultAsync(a => a.UserName == r.UserName && !a.IsDeleted, ct);
-
-        if (admin is null || !admin.IsActive || !_passwords.Verify(admin.PasswordHash, r.Password))
-            return Unauthorized("Invalid username or password.");
-
-        return Ok(new { accessToken = _tokens.CreatePlatformAdminToken(admin.Id, admin.UserName) });
-    }
-    public record BootstrapRequest(Guid TenantId, string UserName, string FullName, string Password);
-
-    [AllowAnonymous]
-    [HttpPost("dev-bootstrap")]
-    public async Task<IActionResult> DevBootstrap(BootstrapRequest r,
-        [FromServices] IHostEnvironment env, CancellationToken ct)
-    {
-        if (!env.IsDevelopment()) return NotFound();
-        
-
-        var exists = await _db.Set<User>().IgnoreQueryFilters()
-            .AnyAsync(u => u.TenantId == r.TenantId && u.UserName == r.UserName, ct);
-        if (exists) return Conflict("User already exists.");
-
-        _db.Set<User>().Add(new User
-        {
-            TenantId = r.TenantId,
-            UserName = r.UserName,
-            FullName = r.FullName,
-            PasswordHash = _passwords.Hash(r.Password),
-            IsTenantAdmin = true
-        });
-        await _db.SaveChangesAsync(ct);
-        return Ok();
-    }
     [Authorize]
     [HttpPost("select-branch")]
     public async Task<ActionResult<AuthResponse>> SelectBranch(SelectBranchRequest r, CancellationToken ct)
@@ -127,7 +95,7 @@ public class AuthController : ControllerBase
             .Where(a => a.UserId == userId && a.IsActive)
             .ToListAsync(ct);
 
-        Guid? companyId = null;
+        Guid? companyId;
         var match = assignments.FirstOrDefault(a => a.BranchId == r.BranchId);
 
         if (match is not null)
@@ -137,8 +105,7 @@ public class AuthController : ControllerBase
         else if (user.IsTenantAdmin)
         {
             // tenant admin may enter any branch of the tenant without an assignment
-            var branch = await _db.Set<RetailX.Organization.Domain.Branch>()
-                .FirstOrDefaultAsync(b => b.Id == r.BranchId, ct);
+            var branch = await _db.Set<Branch>().FirstOrDefaultAsync(b => b.Id == r.BranchId, ct);
             if (branch is null) return NotFound("Branch not found.");
             companyId = branch.CompanyId;
         }
@@ -154,14 +121,16 @@ public class AuthController : ControllerBase
         var branches = assignments.Select(a => new BranchOption(a.CompanyId, a.BranchId)).ToList();
         return new AuthResponse(token, refresh, true, branches);
     }
+
     [AllowAnonymous]
     [HttpPost("refresh")]
     public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest r, CancellationToken ct)
     {
         var hash = _tokens.HashRefreshToken(r.RefreshToken);
 
+        // the hash is unique, so the tenant doesn't need to be supplied
         var stored = await _db.Set<RefreshToken>().IgnoreQueryFilters()
-            .FirstOrDefaultAsync(t => t.TokenHash == hash && t.TenantId == r.TenantId, ct);
+            .FirstOrDefaultAsync(t => t.TokenHash == hash, ct);
 
         if (stored is null) return Unauthorized();
 
@@ -195,7 +164,7 @@ public class AuthController : ControllerBase
             TokenHash = newHash,
             CompanyId = stored.CompanyId,
             BranchId = stored.BranchId,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(14)
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(RefreshTokenDays)
         });
         await _db.SaveChangesAsync(ct);
 
@@ -204,8 +173,22 @@ public class AuthController : ControllerBase
 
         return new AuthResponse(access, newRaw, stored.BranchId is not null, Array.Empty<BranchOption>());
     }
+
+    [AllowAnonymous]
+    [HttpPost("platform-login")]
+    public async Task<IActionResult> PlatformLogin(PlatformLoginRequest r, CancellationToken ct)
+    {
+        var admin = await _db.Set<PlatformAdmin>()
+            .FirstOrDefaultAsync(a => a.UserName == r.UserName && !a.IsDeleted, ct);
+
+        if (admin is null || !admin.IsActive || !_passwords.Verify(admin.PasswordHash, r.Password))
+            return Unauthorized("Invalid username or password.");
+
+        return Ok(new { accessToken = _tokens.CreatePlatformAdminToken(admin.Id, admin.UserName) });
+    }
+
     private async Task<string> IssueRefreshTokenAsync(
-    Guid tenantId, Guid userId, Guid? companyId, Guid? branchId, CancellationToken ct)
+        Guid tenantId, Guid userId, Guid? companyId, Guid? branchId, CancellationToken ct)
     {
         var raw = _tokens.GenerateRefreshToken();
         _db.Set<RefreshToken>().Add(new RefreshToken
@@ -215,7 +198,7 @@ public class AuthController : ControllerBase
             TokenHash = _tokens.HashRefreshToken(raw),
             CompanyId = companyId,
             BranchId = branchId,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(14)
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(RefreshTokenDays)
         });
         await _db.SaveChangesAsync(ct);
         return raw;

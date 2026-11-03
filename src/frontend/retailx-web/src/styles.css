@@ -7,50 +7,48 @@
 
 /* ---------- Semantic tokens: Light ---------- */
 :root {
-  --canvas: #f6f7fa;
+  --canvas: #f7f8fa;
   --surface: #ffffff;
-  --surface-sub: #eff2f7;
-  --border: #d8dde7;
-  --text: #121a2c;
-  --text-muted: #5a6478;
+  --surface-sub: #eef0f4;
+  --border: #dcdfe6;
+  --text: #182235;
+  --text-muted: #505866;
 
-  --primary: #2f55d4;
-  --primary-hover: #2646b0;
-  --primary-soft: #e9eefc;
+  --primary: #3157d5;
+  --primary-hover: #2544ab;
+  --primary-soft: #eef2ff;
   --on-primary: #ffffff;
 
-  --secondary: #0e8a6b;
-  --success: #17794a;   --success-soft: #e6f6ee;
-  --warning: #9a5b0a;   --warning-soft: #fdf3da;
-  --danger: #c0233f;    --danger-soft: #fde8ec;
-  --info: #2f55d4;      --info-soft: #e9eefc;
+  --secondary: #07846e;
+  --success: #126740;   --success-soft: #e8f7ef;
+  --warning: #783f0e;   --warning-soft: #fef3d3;
+  --danger: #c0233f;    --danger-soft: #fff1f2;
+  --info: #3157d5;      --info-soft: #eef2ff;
 
-  --focus: #2f55d4;
+  --focus: #3157d5;
 }
 
-/* ---------- Semantic tokens: Dark ---------- */
 [data-theme="dark"] {
-  --canvas: #0d1424;
-  --surface: #141d31;
-  --surface-sub: #1b2641;
-  --border: #2a3652;
+  --canvas: #0f1626;
+  --surface: #182235;
+  --surface-sub: #1f293d;
+  --border: #263146;
   --text: #e8ecf6;
-  --text-muted: #9aa6bf;
+  --text-muted: #a3adc2;
 
-  --primary: #6f8ff0;
-  --primary-hover: #8aa3f5;
-  --primary-soft: #1e2b52;
-  --on-primary: #0d1424;
+  --primary: #7c94f0;
+  --primary-hover: #96a9f4;
+  --primary-soft: #172546;
+  --on-primary: #0f1626;
 
-  --secondary: #2fc7a0;
-  --success: #46d08a;   --success-soft: #0f2f22;
-  --warning: #f0b84a;   --warning-soft: #3a2a0c;
-  --danger: #ff7f95;    --danger-soft: #451424;
-  --info: #8aa3f5;      --info-soft: #16264d;
+  --secondary: #32c4a6;
+  --success: #72dda9;   --success-soft: #082c1d;
+  --warning: #fcd34d;   --warning-soft: #3a2a0c;
+  --danger: #ff9fb0;    --danger-soft: #761c32;
+  --info: #96a9f4;      --info-soft: #172546;
 
-  --focus: #8aa3f5;
+  --focus: #96a9f4;
 }
-
 /* ---------- Expose tokens as Tailwind utilities ---------- */
 @theme inline {
   --color-canvas: var(--canvas);

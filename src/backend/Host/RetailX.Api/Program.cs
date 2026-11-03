@@ -26,7 +26,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentContext, CurrentContext>();
 
 builder.Services.AddScoped<AuditingInterceptor>();
-
+builder.Services.AddScoped<RetailX.Identity.Api.TenantResolver>();
 builder.Services.AddDbContext<RetailXDbContext>((sp, options) =>
     options
         .UseSqlServer(builder.Configuration.GetConnectionString("Default"))
